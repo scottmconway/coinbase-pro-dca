@@ -6,10 +6,25 @@
         },
         {
             "trading_pair": "ETH-USD",
-            "amount": 100,
+            "amount": 100
         }
     ],
+    "external_wallets": {
+        "BTC": {
+            "max_value_before_move": 1000,
+            "destination_wallet": ""
+        },
+        "ETH": {
+            "max_value_before_move": 1000,
+            "destination_wallet": ""
+        }
+    },
     "coinbase_pro": {
+        "password": "",
+        "api_key": "",
+        "api_secret": ""
+    },
+    "coinbase_pro_sandbox": {
         "password": "",
         "api_key": "",
         "api_secret": ""
