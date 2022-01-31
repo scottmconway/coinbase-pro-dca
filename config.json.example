@@ -1,4 +1,8 @@
 {
+    "deposit": {
+        "purchases_per_period": 31,
+        "payment_method_id": ""
+    }
     "orders": [
         {
             "trading_pair": "BTC-USD",
