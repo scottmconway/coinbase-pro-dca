@@ -1,4 +1,5 @@
 {
+    "minimum_nag_value": 100,
     "deposit": {
         "purchases_per_period": 31,
         "payment_method_id": ""

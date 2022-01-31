@@ -94,9 +94,14 @@ class CoinbaseProDca:
         # This is assuming that we're only issuing market orders
         # which is a fair assumption for this tool
         for order in issued_orders[::-1]:
-            while not order["settled"]:
-                order = self.cbpro_api.get_order(order["id"])
-                sleep(1)
+            try:
+                while not order["settled"]:     # investigate possible keyerror
+                    order = self.cbpro_api.get_order(order["id"])
+                    sleep(1)
+            except KeyError:
+                self.logger.error(f"{self.sandbox_msg}"
+                                  "KeyError on order['settled'] - "
+                                  f"Order: {order}")
 
     def withdraw_funds(self):
         ext_wallets = self.config.get("external_wallets", dict())
@@ -108,10 +113,12 @@ class CoinbaseProDca:
         for acct in self.cbpro_api.get_accounts():
             wallet_conf = ext_wallets.get(acct["currency"], None)
             if wallet_conf is None:
-                if float(acct['balance']) > 0 and acct['currency'] not in self.IGNORED_CURRENCIES:
+                if float(acct['balance']) >= self.config.get('minimum_nag_value', 100) \
+                        and acct['currency'] not in self.IGNORED_CURRENCIES:
                     # let the user know that they don't have an ext wallet set up
-                    # for this asset if its value is > 0
-                    self.logger.warning("No external wallet set for currency "
+                    # for this asset if its value is >= the "nag value"
+                    self.logger.warning(f"{self.sandbox_msg}"
+                                        "No external wallet set for currency "
                                         "%s with balance %s"
                                         % (acct['currency'],
                                            float(acct['balance'])))
@@ -130,7 +137,7 @@ class CoinbaseProDca:
 
                 except KeyError:
                     self.logger.error(
-                        "Error retrieving USD conversion "
+                        f"{self.sandbox_msg}Error retrieving USD conversion "
                         f"rate for asset {acct['currency']} "
                         "- continuing"
                     )
@@ -144,7 +151,7 @@ class CoinbaseProDca:
 
                     withdraw_dict = {
                         "currency": acct["currency"],
-                        "amount": acct["balance"],
+                        "amount": acct["available"],
                         "crypto_address": wallet_conf["destination_wallet"],
                     }
 

@@ -68,3 +68,5 @@ Additionally, if possible, you should enable the `IP Whitelist` section when cre
 `coinbase_pro_sandbox` contains the same parameters as `coinbase_pro`, but for a coinbase pro sandbox account. This section is utilized when the `--sandbox` argument is passed to `coinbase_pro_dca.py`.
 
 `logging` specifies the logging level, and optionally, a configuration to log to a gotify server, utilizing [gotify-handler](https://github.com/scottmconway/gotify-handler).
+
+`minimum_nag_value` contains the lowest account balance for which the user should be nagged for not having configured an external wallet. By default, it's set to $100 USD.
