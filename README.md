@@ -41,6 +41,8 @@ This might be changed in the future if it's found to be a nuisance.
 ## Configuration
 See config.json.example for an example configuration.
 
+You can also invoke `python3 config_wizard.py` for a guided process to create a configuration file.
+
 `deposit->payment_method_id` is the `id` of a payment method from Coinbase Pro. I can't find this value in the Web UI, but it can be retrieved through this [API endpoint](https://docs.cloud.coinbase.com/exchange/reference/exchangerestapi_getpaymentmethods) in Coinbase Pro. At some point I'll add a wizard to make the initial config generation less painful.
 
 `deposit->purchases_per_period` defines the number of purchases that you intend to make per `deposit` period. For example - for investing each day for a month with a deposit each month, the value should be set to 31. This value is multiplied by the sum of all orders to determine how much money to deposit from the selected payment method when the `deposit` action is used.
