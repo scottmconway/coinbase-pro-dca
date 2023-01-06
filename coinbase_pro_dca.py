@@ -81,7 +81,7 @@ class CoinbaseProDca:
 
             else:
                 self.logger.info(
-                    f"{self.sandbox_msg}Successfully bought ${order['amount']} "
+                    f"{self.sandbox_msg}Successfully bought ${order['amount']:.2f} "
                     f"of {order['trading_pair'].split('-')[0]}"
                 )
                 issued_orders.append(res)
@@ -93,15 +93,21 @@ class CoinbaseProDca:
         #
         # This is assuming that we're only issuing market orders
         # which is a fair assumption for this tool
+
+        # TODO make sleep times configurable
         for order in issued_orders[::-1]:
-            try:
-                while not order["settled"]:     # investigate possible keyerror
-                    order = self.cbpro_api.get_order(order["id"])
-                    sleep(1)
-            except KeyError:
-                self.logger.error(f"{self.sandbox_msg}"
-                                  "KeyError on order['settled'] - "
-                                  f"Order: {order}")
+            last_settled = False
+            for _ in range(10):
+                order = self.cbpro_api.get_order(order["id"])
+                if order.get("settled", False):
+                    last_settled = True
+                    break
+                sleep(3)
+
+            if not last_settled:
+                self.logger.error(
+                    f"{self.sandbox_msg}Order {order['id']} has not settled in 30 seconds"
+                )
 
     def withdraw_funds(self):
         ext_wallets = self.config.get("external_wallets", dict())
@@ -113,15 +119,18 @@ class CoinbaseProDca:
         for acct in self.cbpro_api.get_accounts():
             wallet_conf = ext_wallets.get(acct["currency"], None)
             if wallet_conf is None:
-                if float(acct['balance']) >= self.config.get('minimum_nag_value', 100) \
-                        and acct['currency'] not in self.IGNORED_CURRENCIES:
+                if (
+                    float(acct["balance"]) >= self.config.get("minimum_nag_value", 100)
+                    and acct["currency"] not in self.IGNORED_CURRENCIES
+                ):
                     # let the user know that they don't have an ext wallet set up
                     # for this asset if its value is >= the "nag value"
-                    self.logger.warning(f"{self.sandbox_msg}"
-                                        "No external wallet set for currency "
-                                        "%s with balance %s"
-                                        % (acct['currency'],
-                                           float(acct['balance'])))
+                    self.logger.warning(
+                        f"{self.sandbox_msg}"
+                        "No external wallet set for currency "
+                        "%s with balance %s"
+                        % (acct["currency"], float(acct["balance"]))
+                    )
                 else:
                     # Skip empty or ignored accounts
                     continue
@@ -185,7 +194,7 @@ def main():
     parser.add_argument(
         "--sandbox",
         action="store_true",
-        help="If true, utilize the Coinbase Pro Sandbox, for testing purposes"
+        help="If true, utilize the Coinbase Pro Sandbox for testing purposes",
     )
     args = parser.parse_args()
 
